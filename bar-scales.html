@@ -30,7 +30,7 @@
 <body>
 	<div class="o-content-width">
 		
-		<span id="toggle">do</span>
+		<span id="changeData">change data</span>
 
 	</div><!-- /.o-content-width -->
 
@@ -79,8 +79,8 @@
 
         /**
         * get x value for bar
-        * @returns {number}
         * @param {number} i The index in the dataset
+        * @returns {number}
         */
         var getBarX = function(i) {
         	return xScale(i);
@@ -89,12 +89,24 @@
 
         /**
         * get y value for bar
-        * @returns {number}
         * @param {number} d The current value in the dataset
+        * @returns {number}
         */
         var getBarY = function(d) {
         	return (h - yScale(d));
         };
+
+
+        /**
+        * get color for current bar
+        * @param {number} d The current value in the dataset
+        * @returns {string} color value like rgb(0,0,0)
+        */
+        var getBarColor = function(d) {
+        	var color = 'rgb(0,0,'+d*10+')';
+        	return color;
+        };
+        
         
 
 		
@@ -121,8 +133,7 @@
 					return yScale(d);
 				})
 				.attr('fill', function(d) {
-					var color = 'rgb(0,0,'+d*10+')';
-					return color;
+					return getBarColor(d);
 				});
 
 			svg.selectAll('text')
@@ -146,14 +157,49 @@
 
 
 		/**
+		* change data upon click
+		* @returns {undefined}
+		*/
+		var changeDataHandler = function(e) {
+			console.log('change');
+			var newDataset = [16, 20, 12, 39, 42, 43, 26, 31, 33, 35, 5, 10, 15, 20, 40, 38, 17, 21, 44];
+			// bind new data to rects
+			svg.selectAll('rect')
+				.data(newDataset);
+
+			// now update rects to represent new data
+			svg.selectAll('rect')
+				.data(newDataset)
+				.attr('y', function(d) {
+					return getBarY(d);
+				})
+				.attr('height', function(d) {
+					return yScale(d);
+				})
+				.attr('fill', function(d) {
+					return getBarColor(d);
+				});;
+
+			// and update text
+			svg.selectAll('text')
+				.data(newDataset)
+				.text(function(d) {
+					return d;
+				})
+				.attr('y', function(d) {
+					return getBarY(d)
+				});
+		};
+		
+
+
+		/**
 		* initizlize data change
 		* @returns {undefined}
 		*/
 		var initDataChange = function() {
-			d3.select('#toggle')
-				.on('click', function() {
-					console.log('klik');
-				});
+			d3.select('#changeData')
+				.on('click', changeDataHandler);
 		};
 		
 		
