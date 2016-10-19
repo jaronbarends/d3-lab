@@ -1,0 +1,19 @@
+{
+	"characters": [
+		{
+			"name": "Darth Vader",
+			"type": "human",
+			"nature": "bad"
+		},
+		{
+			"name": "Luke Skywalker",
+			"type": "human",
+			"nature": "good"
+		},
+		{
+			"name": "R2-D2",
+			"type": "droid",
+			"nature": "good"
+		}
+	]
+}

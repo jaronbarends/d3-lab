@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 test</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/style.css">
+	<style>
+		.bar {
+			display: inline-block;
+			margin: 0 2px;
+			width: 20px;
+			height: 0;
+			background: orange;
+		}
+
+		.bar__label {
+			fill: white;
+			width: 49px;
+			text-anchor: middle;
+			transform: translate(0, 1.2em);
+		}
+
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+		
+		<span id="toggle">do</span>
+
+	</div><!-- /.o-content-width -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/d3.min.js"></script>
+	<script>
+		var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
+			w = 600,
+			h = 250,
+			padding = 4;
+
+		var svg = d3.select('body').append('svg');
+
+
+		var svg = d3.select('body')
+			.append('svg')
+			.attr('width', w)
+			.attr('height', h);
+
+		var xScale,
+			yScale;
+
+
+        /**
+        * initialize scales
+        * @returns {undefined}
+        */
+        var initScales = function() {
+   //      	console.log(d3);
+			// ====== V3 version:
+			// xScale = d3.scaleOrdinal()
+			// 	.domain(d3.range(dataset.length))
+			// 	.rangeRoundBands([0,w], 0.05);
+			xScale = d3.scaleBand()
+				.domain(d3.range(dataset.length))
+				.rangeRound([0, w])
+				.padding(0.1);
+
+			yScale = d3.scaleLinear()
+				.domain([0, d3.max(dataset)])
+				.range([0, h]);
+
+        };
+
+
+        /**
+        * get x value for bar
+        * @returns {number}
+        * @param {number} i The index in the dataset
+        */
+        var getBarX = function(i) {
+        	return xScale(i);
+        };
+
+
+        /**
+        * get y value for bar
+        * @returns {number}
+        * @param {number} d The current value in the dataset
+        */
+        var getBarY = function(d) {
+        	return (h - yScale(d));
+        };
+        
+
+		
+		/**
+		* draw the graph
+		* @returns {undefined}
+		*/
+		var drawGraph = function() {
+			svg.selectAll('rect')
+				.data(dataset)
+				.enter()
+				.append('rect')
+				.attr('x', function(d, i) {
+					// return xScale(i);
+					return getBarX(i);
+				})
+				.attr('y', function(d) {
+					return getBarY(d);
+				})
+				// ====== V3 version:
+					// .attr('width', xScale.rangeBand())
+				.attr('width', xScale.bandwidth())
+				.attr('height', function(d) {
+					return yScale(d);
+				})
+				.attr('fill', function(d) {
+					var color = 'rgb(0,0,'+d*10+')';
+					return color;
+				});
+
+			svg.selectAll('text')
+				.data(dataset)
+				.enter()
+				.append('text')
+				.attr('class', 'bar__label')
+				.text(function(d) {
+					return d;
+				})
+				.attr("x", function(d, i) {
+					var x = getBarX(i) + xScale.bandwidth()/2;
+			        return x;
+			   })
+			   .attr("y", function(d) {
+			        return getBarY(d);
+			   });
+
+
+		};
+
+
+		/**
+		* initizlize data change
+		* @returns {undefined}
+		*/
+		var initDataChange = function() {
+			d3.select('#toggle')
+				.on('click', function() {
+					console.log('klik');
+				});
+		};
+		
+		
+
+		initScales();
+		drawGraph();
+		initDataChange();
+
+	</script>
+</body>
+</html>

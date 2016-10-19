@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 test</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/style.css">
+	<style>
+		.bar {
+			display: inline-block;
+			margin: 0 2px;
+			width: 20px;
+			height: 0;
+			background: orange;
+		}
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+		
+		
+
+	</div><!-- /.o-content-width -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/d3.min.js"></script>
+	<script>
+		var data = [5,10,15,20,25];
+
+		d3.select('body').selectAll('div')
+			.data(data)
+			.enter()
+			.append('div')
+			.attr('class', 'bar')
+			.style('height', function(d) {
+				return 5*d +'px';
+			})
+
+	</script>
+</body>
+</html>
