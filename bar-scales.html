@@ -38,7 +38,10 @@
 	<script src="js/jquery.min.js"></script>
 	<script src="js/d3.min.js"></script>
 	<script>
-		var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
+		// var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
+		var dataset,
+			dataMax,
+			dataCount,
 			w = 600,
 			h = 250,
 			padding = 4;
@@ -53,6 +56,38 @@
 
 		var xScale,
 			yScale;
+
+
+		/**
+		* generate array of random values
+		* @returns {undefined}
+		*/
+		var getRandomData = function(count, max) {
+			if (count) {
+				dataCount = count;
+			}
+			if (max) {
+				dataMax = max;
+			}
+
+			dataset = [];
+			for (var i=0; i<dataCount; i++) {
+				dataset.push(Math.round(dataMax*Math.random()));
+			}
+
+			return dataset;
+		};
+
+
+		/**
+		* initialize first dataset
+		* @returns {undefined}
+		*/
+		var initDataset = function() {
+			dataset = getRandomData(20, 60);
+		};
+		
+			
 
 
         /**
@@ -162,7 +197,8 @@
 		*/
 		var changeDataHandler = function(e) {
 			console.log('change');
-			var newDataset = [16, 20, 12, 39, 42, 43, 26, 31, 33, 35, 5, 10, 15, 20, 40, 38, 17, 21, 44];
+			// var newDataset = [16, 20, 12, 39, 42, 43, 26, 31, 33, 35, 5, 10, 15, 20, 40, 38, 17, 21, 44];
+			var newDataset = getRandomData();
 			// bind new data to rects
 			svg.selectAll('rect')
 				.data(newDataset);
@@ -170,6 +206,7 @@
 			// now update rects to represent new data
 			svg.selectAll('rect')
 				.data(newDataset)
+				.transition()
 				.attr('y', function(d) {
 					return getBarY(d);
 				})
@@ -183,6 +220,7 @@
 			// and update text
 			svg.selectAll('text')
 				.data(newDataset)
+				.transition()
 				.text(function(d) {
 					return d;
 				})
@@ -203,7 +241,7 @@
 		};
 		
 		
-
+		initDataset();
 		initScales();
 		drawGraph();
 		initDataChange();
