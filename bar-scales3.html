@@ -39,8 +39,8 @@
 	<script>
 		// var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
 		var dataset,
-			dataMax,
-			dataCount,
+			dataMax = 60,
+			dataCount = 20,
 			w = 600,
 			h = 250,
 			padding = 4;
@@ -62,16 +62,18 @@
 		* @returns {undefined}
 		*/
 		var getRandomData = function(count, max) {
-			if (count) {
-				dataCount = count;
-			}
-			if (max) {
-				dataMax = max;
-			}
+			// if (count) {
+			// 	dataCount = count;
+			// }
+			// if (max) {
+			// 	dataMax = max;
+			// }
+
+			var currMax = Math.round(dataMax*Math.random());
 
 			dataset = [];
 			for (var i=0; i<dataCount; i++) {
-				dataset.push(Math.round(dataMax*Math.random()));
+				dataset.push(Math.round(currMax*Math.random()));
 			}
 
 			return dataset;
@@ -83,11 +85,10 @@
 		* @returns {undefined}
 		*/
 		var initDataset = function() {
-			dataset = getRandomData(20, 60);
+			// dataset = getRandomData(20, 40);
+			dataset = getRandomData();
 		};
 		
-			
-
 
         /**
         * initialize scales
@@ -141,8 +142,6 @@
         	return color;
         };
         
-        
-
 		
 		/**
 		* draw the graph
@@ -191,25 +190,41 @@
 
 
 		/**
+		* make a selection and animate it
+		* @param {string} selector Selector for what you want
+		* @param {array} dataset The dataset to map on the selection
+		* @returns {d3 selection}
+		*/
+		var selectAndAnimate = function(selector, dataset) {
+			var selection = svg.selectAll(selector)
+				.data(dataset)
+				.transition()
+				.delay(function(d, i) {
+					return i*50;
+				})
+				.duration(1000);
+
+			return selection;
+		};
+		
+
+
+		/**
 		* change data upon click
 		* @returns {undefined}
 		*/
 		var changeDataHandler = function(e) {
-			console.log('change');
-			// var newDataset = [16, 20, 12, 39, 42, 43, 26, 31, 33, 35, 5, 10, 15, 20, 40, 38, 17, 21, 44];
 			var newDataset = getRandomData();
+
+			//update scale to new data
+			yScale.domain([0, d3.max(newDataset)]);
+
 			// bind new data to rects
 			svg.selectAll('rect')
 				.data(newDataset);
 
 			// now update rects to represent new data
-			svg.selectAll('rect')
-				.data(newDataset)
-				.transition()
-				.delay(function(d, i) {
-					return i*50;
-				})
-				.duration(1000)
+			selectAndAnimate('rect', newDataset)
 				.attr('y', function(d) {
 					return getBarY(d);
 				})
@@ -218,16 +233,10 @@
 				})
 				.attr('fill', function(d) {
 					return getBarColor(d);
-				});;
+				});
 
 			// and update text
-			svg.selectAll('text')
-				.data(newDataset)
-				.transition()
-				.delay(function(d, i) {
-					return i*50;
-				})
-				.duration(1000)
+			selectAndAnimate('text', newDataset)
 				.text(function(d) {
 					return d;
 				})

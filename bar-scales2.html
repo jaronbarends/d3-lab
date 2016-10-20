@@ -39,8 +39,8 @@
 	<script>
 		// var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
 		var dataset,
-			dataMax,
-			dataCount,
+			dataMax = 60,
+			dataCount = 20,
 			w = 600,
 			h = 250,
 			padding = 4;
@@ -62,16 +62,18 @@
 		* @returns {undefined}
 		*/
 		var getRandomData = function(count, max) {
-			if (count) {
-				dataCount = count;
-			}
-			if (max) {
-				dataMax = max;
-			}
+			// if (count) {
+			// 	dataCount = count;
+			// }
+			// if (max) {
+			// 	dataMax = max;
+			// }
+
+			var currMax = Math.round(dataMax*Math.random());
 
 			dataset = [];
 			for (var i=0; i<dataCount; i++) {
-				dataset.push(Math.round(dataMax*Math.random()));
+				dataset.push(Math.round(currMax*Math.random()));
 			}
 
 			return dataset;
@@ -83,7 +85,8 @@
 		* @returns {undefined}
 		*/
 		var initDataset = function() {
-			dataset = getRandomData(20, 60);
+			// dataset = getRandomData(20, 40);
+			dataset = getRandomData();
 		};
 		
 			
@@ -195,9 +198,11 @@
 		* @returns {undefined}
 		*/
 		var changeDataHandler = function(e) {
-			console.log('change');
-			// var newDataset = [16, 20, 12, 39, 42, 43, 26, 31, 33, 35, 5, 10, 15, 20, 40, 38, 17, 21, 44];
 			var newDataset = getRandomData();
+
+			//update scale to new data
+			yScale.domain([0, d3.max(newDataset)]);
+
 			// bind new data to rects
 			svg.selectAll('rect')
 				.data(newDataset);
@@ -218,7 +223,17 @@
 				})
 				.attr('fill', function(d) {
 					return getBarColor(d);
-				});;
+				});
+
+			// function animate(selector) {
+			// 	var selection = selectAll(selector)
+			// 		.data()
+			// 		.trans()
+			// 		.delay()
+			// 		.duration();
+
+			// 	return selection
+			// }
 
 			// and update text
 			svg.selectAll('text')
