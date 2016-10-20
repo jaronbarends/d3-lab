@@ -143,7 +143,7 @@
         * @param {d3 selection} selection Selection containing newly added elements
         * @returns {d3 selection}
         */
-        var renderBar = function(selection) {
+        var renderBars = function(selection) {
         	selection = selection.attr('x', function(d, i) {
 					return getBarX(i);
 				})
@@ -169,7 +169,7 @@
         * @param {d3 selection} selection Selection containing newly added elements
         * @returns {d3 selection}
         */
-        var renderBarLabel = function(selection) {
+        var renderBarLabels = function(selection) {
         	selection = selection
 				.attr('class', 'bar__label')
 				.text(function(d) {
@@ -186,7 +186,6 @@
 			return selection;
         };
         
-        
 		
 		/**
 		* draw the graph
@@ -197,13 +196,13 @@
 				.data(dataset)
 				.enter()
 				.append('rect');
-			renderBar(selection);
+			renderBars(selection);
 
 			selection = svg.selectAll('text')
 				.data(dataset)
 				.enter()
 				.append('text');
-			renderBarLabel(selection);
+			renderBarLabels(selection);
 		};
 
 
@@ -238,43 +237,28 @@
 			yScale.domain([0, d3.max(newDataset)]);
 
 			// add new elements if needed
-			var selection = svg.selectAll('rect')
+			var barSelection = svg.selectAll('rect')
 				.data(newDataset)
 				.enter()
 				.append('rect');
 
-			// bind new data to rects
-			// svg.selectAll('rect')
-			// 	.data(newDataset);
-
 			// now update rects to represent new data
-			selection = svg.selectAll('rect')
+			barSelection = svg.selectAll('rect')
 				.data(newDataset);
+			barSelection = animateSelection(barSelection);
+			barSelection = renderBars(barSelection);
 
-			selection = animateSelection(selection);
-			selection = renderBar(selection);
-				// .attr('y', function(d) {
-				// 	return getBarY(d);
-				// })
-				// .attr('height', function(d) {
-				// 	return yScale(d);
-				// })
-				// .attr('fill', function(d) {
-				// 	return getBarColor(d);
-				// });
+			var textSelection = svg.selectAll('text')
+				.data(newDataset)
+				.enter()
+				.append('text');
 
 			// and update text
-			// selectAndAnimate('text', newDataset)
-			selection = svg.selectAll('text')
+			textSelection = svg.selectAll('text')
 				.data(newDataset);
 
-			animateSelection(selection)
-				.text(function(d) {
-					return d;
-				})
-				.attr('y', function(d) {
-					return getBarY(d)
-				});
+			textSelection = animateSelection(textSelection);
+			textSelection = renderBarLabels(textSelection);
 		};
 		
 
