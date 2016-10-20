@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 test</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/style.css">
+	<style>
+		.bar {
+			display: inline-block;
+			margin: 0 2px;
+			width: 20px;
+			height: 0;
+			background: orange;
+		}
+
+		.bar__label {
+			fill: white;
+			text-anchor: middle;
+			transform: translate(0, 1.2em);
+		}
+
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+		
+		<span id="changeData">change data</span><br>
+		<span id="addBar">add bar</span><br>
+		<span id="removeBar">remove data</span>
+
+	</div><!-- /.o-content-width -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/d3.min.js"></script>
+	<script>
+		var sgDataset,
+			sgDataMaxValue = 60,
+			sgDataCount = 5,
+			w = 600,
+			h = 250;
+
+		var sgSvg = d3.select('body')
+			.append('svg')
+			.attr('width', w)
+			.attr('height', h);
+
+		var sgXScale,
+			sgYScale;
+
+
+		/**
+		* generate array of random values
+		* @param {number} deltaCount Difference in number of elements in set
+		* @returns {undefined}
+		*/
+		var randomizeDataset = function() {
+			sgDataset = [];
+			for (var i=0; i<sgDataCount; i++) {
+				addRandomDataValue();
+			}
+
+			return sgDataset;
+		};
+
+
+		/**
+		* add a random value to dataset
+		* @returns {undefined}
+		*/
+		var addRandomDataValue = function() {
+			sgDataset.push(Math.round(sgDataMaxValue*Math.random()));
+		};
+
+
+		/**
+		* initialize first dataset
+		* @returns {undefined}
+		*/
+		var initDataset = function() {
+			sgDataset = randomizeDataset();
+		};
+		
+
+        /**
+        * initialize scales
+        * @returns {undefined}
+        */
+        var initScales = function() {
+			// ====== V3 version:
+				// sgXScale = d3.scaleOrdinal()
+				// 	.domain(d3.range(sgDataset.length))
+				// 	.rangeRoundBands([0,w], 0.05);
+			sgXScale = d3.scaleBand()
+				.domain(d3.range(sgDataset.length))
+				.rangeRound([0, w])
+				.padding(0.1);
+
+			sgYScale = d3.scaleLinear()
+				.domain([0, d3.max(sgDataset)])
+				.range([0, h]);
+
+        };
+
+
+        /**
+        * update scales to current dataset
+        * @returns {undefined}
+        */
+        var updateScales = function() {
+        	//update xScale to new number of items
+        	sgXScale.domain(d3.range(sgDataset.length));
+
+        	//update yScale to new values
+        	sgYScale.domain([0, d3.max(sgDataset)]);
+        };
+        
+
+
+        /**
+        * get x value for bar
+        * @param {number} i The index in the dataset
+        * @returns {number}
+        */
+        var getBarX = function(i) {
+        	return sgXScale(i);
+        };
+
+
+        /**
+        * get y value for bar
+        * @param {number} d The current value in the dataset
+        * @returns {number}
+        */
+        var getBarY = function(d) {
+        	return (h - sgYScale(d));
+        };
+
+
+        /**
+        * get color for current bar
+        * @param {number} d The current value in the dataset
+        * @returns {string} color value like rgb(0,0,0)
+        */
+        var getBarColor = function(d) {
+        	var blue = d*20,
+        		color = 'rgb(0,0,'+blue+')';
+        	return color;
+        };
+
+
+        /**
+        * add bar to newly appended elements
+        * @param {d3 selection} selection Selection containing newly added elements
+        * @returns {d3 selection}
+        */
+        var renderBars = function(selection) {
+        	selection = selection.attr('x', function(d, i) {
+					return getBarX(i);
+				})
+				.attr('y', function(d) {
+					return getBarY(d);
+				})
+				.attr('width', sgXScale.bandwidth())
+				.attr('height', function(d) {
+					return sgYScale(d);
+				})
+				.attr('fill', function(d) {
+					return getBarColor(d);
+				});
+
+			return selection;
+        };
+
+
+        /**
+        * add label text to newly appended elements
+        * @param {d3 selection} selection Selection containing newly added elements
+        * @returns {d3 selection}
+        */
+        var renderBarLabels = function(selection) {
+        	selection = selection
+				.attr('class', 'bar__label')
+				.text(function(d) {
+					return d;
+				})
+				.attr("x", function(d, i) {
+					var x = getBarX(i) + sgXScale.bandwidth()/2;
+			        return x;
+			   })
+			   .attr("y", function(d) {
+			        return getBarY(d);
+			   });
+
+			return selection;
+        };
+        
+		
+		/**
+		* draw the graph
+		* @returns {undefined}
+		*/
+		var drawGraph = function() {
+			var selection = sgSvg.selectAll('rect')
+				.data(sgDataset)
+				.enter()
+				.append('rect');
+			renderBars(selection);
+
+			selection = sgSvg.selectAll('text')
+				.data(sgDataset)
+				.enter()
+				.append('text');
+			renderBarLabels(selection);
+		};
+
+
+		/**
+		* animate a selection
+		* @param {d3 selection} selection The selection to animate
+		* @returns {d3 selection}
+		*/
+		var animateSelection = function(selection) {
+			selection = selection.transition()
+				.delay(function(d, i) {
+					return i*50;
+				})
+				.duration(1000);
+
+			return selection;
+		};
+
+
+		/**
+		* select and update bars after change
+		* @returns {d3 selection}
+		*/
+		var selectAndUpdateBars = function() {
+			var	selection = sgSvg.selectAll('rect')
+				.data(sgDataset);
+			selection = animateSelection(selection);
+			selection = renderBars(selection);
+
+			return selection;
+		};
+
+
+		/**
+		* select and update bar labels after change
+		* @returns {d3 selection}
+		*/
+		var selectAndUpdateBarLabels = function() {
+			var	selection = sgSvg.selectAll('text')
+				.data(sgDataset);
+			selection = animateSelection(selection);
+			selection = renderBarLabels(selection);
+
+			return selection;
+		};
+
+
+		/**
+		* add a bar
+		* @param {event} e Click event
+		* @returns {undefined}
+		*/
+		var addBarHandler = function() {
+			addRandomDataValue();
+			sgDataCount++;
+			updateScales();
+
+			// add new bar elements
+			var barSelection = sgSvg.selectAll('rect')
+				.data(sgDataset)
+				.enter()
+				.append('rect');
+
+			barSelection = selectAndUpdateBars();
+
+			// add new text elements
+			var textSelection = sgSvg.selectAll('text')
+				.data(sgDataset)
+				.enter()
+				.append('text');
+
+			// and update text
+			selectAndUpdateBarLabels();
+		};
+
+
+		/**
+		* add a bar
+		* @param {event} e Click event
+		* @returns {undefined}
+		*/
+		var removeBarHandler = function() {
+			sgDataset.shift();
+			sgDataCount--;
+			updateScales();
+
+			// remove obsolete bar elements
+			var barSelection = sgSvg.selectAll('rect')
+				.data(sgDataset)
+				.exit()
+				.remove();
+
+			selectAndUpdateBars();
+
+			// remove obsolete text elements
+			var textSelection = sgSvg.selectAll('text')
+				.data(sgDataset)
+				.exit()
+				.remove();
+
+			// and update text
+			selectAndUpdateBarLabels();
+		};
+		
+
+
+		/**
+		* change data upon click
+		* @returns {undefined}
+		*/
+		var changeDataHandler = function() {
+			randomizeDataset();
+			updateScales();
+			selectAndUpdateBars();
+			selectAndUpdateBarLabels();
+		};
+		
+
+
+		/**
+		* initizlize data change
+		* @returns {undefined}
+		*/
+		var addEventListeners = function() {
+			d3.select('#changeData').on('click', changeDataHandler);
+			d3.select('#addBar').on('click', addBarHandler);
+			d3.select('#removeBar').on('click', removeBarHandler);
+		};
+		
+		
+		initDataset();
+		initScales();
+		drawGraph();
+		addEventListeners();
+
+	</script>
+</body>
+</html>
