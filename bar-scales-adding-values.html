@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 test</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="css/style.css">
+	<style>
+		.bar {
+			display: inline-block;
+			margin: 0 2px;
+			width: 20px;
+			height: 0;
+			background: orange;
+		}
+
+		.bar__label {
+			fill: white;
+			text-anchor: middle;
+			transform: translate(0, 1.2em);
+		}
+
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+		
+		<span id="changeData">change data</span>
+
+	</div><!-- /.o-content-width -->
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/d3.min.js"></script>
+	<script>
+		// var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
+		var dataset,
+			dataMax = 60,
+			dataCount = 20,
+			w = 600,
+			h = 250,
+			padding = 4;
+
+		var svg = d3.select('body').append('svg');
+
+
+		var svg = d3.select('body')
+			.append('svg')
+			.attr('width', w)
+			.attr('height', h);
+
+		var xScale,
+			yScale;
+
+
+		/**
+		* generate array of random values
+		* @param {number} deltaCount Difference in number of elements in set
+		* @returns {undefined}
+		*/
+		var getRandomData = function(deltaCount) {
+			var currMax = Math.round(dataMax*Math.random());
+			deltaCount = deltaCount || 0;
+			dataCount += deltaCount;
+			dataset = [];
+
+			for (var i=0; i<dataCount; i++) {
+				dataset.push(Math.round(currMax*Math.random()));
+			}
+
+			return dataset;
+		};
+
+
+		/**
+		* initialize first dataset
+		* @returns {undefined}
+		*/
+		var initDataset = function() {
+			dataset = getRandomData();
+		};
+		
+
+        /**
+        * initialize scales
+        * @returns {undefined}
+        */
+        var initScales = function() {
+			// ====== V3 version:
+				// xScale = d3.scaleOrdinal()
+				// 	.domain(d3.range(dataset.length))
+				// 	.rangeRoundBands([0,w], 0.05);
+			xScale = d3.scaleBand()
+				.domain(d3.range(dataset.length))
+				.rangeRound([0, w])
+				.padding(0.1);
+
+			yScale = d3.scaleLinear()
+				.domain([0, d3.max(dataset)])
+				.range([0, h]);
+
+        };
+
+
+        /**
+        * get x value for bar
+        * @param {number} i The index in the dataset
+        * @returns {number}
+        */
+        var getBarX = function(i) {
+        	return xScale(i);
+        };
+
+
+        /**
+        * get y value for bar
+        * @param {number} d The current value in the dataset
+        * @returns {number}
+        */
+        var getBarY = function(d) {
+        	return (h - yScale(d));
+        };
+
+
+        /**
+        * get color for current bar
+        * @param {number} d The current value in the dataset
+        * @returns {string} color value like rgb(0,0,0)
+        */
+        var getBarColor = function(d) {
+        	var blue = d*20,
+        		color = 'rgb(0,0,'+blue+')';
+        	return color;
+        };
+
+
+        /**
+        * add bar to newly appended elements
+        * @param {d3 selection} selection Selection containing newly added elements
+        * @returns {d3 selection}
+        */
+        var renderBar = function(selection) {
+        	selection = selection.attr('x', function(d, i) {
+					return getBarX(i);
+				})
+				.attr('y', function(d) {
+					return getBarY(d);
+				})
+				// ====== V3 version:
+					// .attr('width', xScale.rangeBand())
+				.attr('width', xScale.bandwidth())
+				.attr('height', function(d) {
+					return yScale(d);
+				})
+				.attr('fill', function(d) {
+					return getBarColor(d);
+				});
+				console.log('done');
+
+			return selection;
+        };
+
+
+        /**
+        * add label text to newly appended elements
+        * @param {d3 selection} selection Selection containing newly added elements
+        * @returns {d3 selection}
+        */
+        var renderBarLabel = function(selection) {
+        	selection = selection
+				.attr('class', 'bar__label')
+				.text(function(d) {
+					return d;
+				})
+				.attr("x", function(d, i) {
+					var x = getBarX(i) + xScale.bandwidth()/2;
+			        return x;
+			   })
+			   .attr("y", function(d) {
+			        return getBarY(d);
+			   });
+
+			return selection;
+        };
+        
+        
+		
+		/**
+		* draw the graph
+		* @returns {undefined}
+		*/
+		var drawGraph = function() {
+			var selection = svg.selectAll('rect')
+				.data(dataset)
+				.enter()
+				.append('rect');
+			renderBar(selection);
+
+			selection = svg.selectAll('text')
+				.data(dataset)
+				.enter()
+				.append('text');
+			renderBarLabel(selection);
+		};
+
+
+		/**
+		* animate a selection
+		* @param {d3 selection} selection The selection to animate
+		* @returns {d3 selection}
+		*/
+		var animateSelection = function(selection) {
+			selection = selection.transition()
+				.delay(function(d, i) {
+					return i*50;
+				})
+				.duration(1000);
+
+			return selection;
+		};
+
+
+		/**
+		* change data upon click
+		* @returns {undefined}
+		*/
+		var changeDataHandler = function(e) {
+			var deltaCount = 0,
+				newDataset = getRandomData(deltaCount);
+
+			//update xScale to new number of items
+			xScale.domain(d3.range(newDataset.length));
+
+			//update yScale to new values
+			yScale.domain([0, d3.max(newDataset)]);
+
+			// add new elements if needed
+			var selection = svg.selectAll('rect')
+				.data(newDataset)
+				.enter()
+				.append('rect');
+
+			// bind new data to rects
+			// svg.selectAll('rect')
+			// 	.data(newDataset);
+
+			// now update rects to represent new data
+			selection = svg.selectAll('rect')
+				.data(newDataset);
+
+			animateSelection(selection)
+				.attr('y', function(d) {
+					return getBarY(d);
+				})
+				.attr('height', function(d) {
+					return yScale(d);
+				})
+				.attr('fill', function(d) {
+					return getBarColor(d);
+				});
+
+			// and update text
+			// selectAndAnimate('text', newDataset)
+			selection = svg.selectAll('text')
+				.data(newDataset);
+
+			animateSelection(selection)
+				.text(function(d) {
+					return d;
+				})
+				.attr('y', function(d) {
+					return getBarY(d)
+				});
+		};
+		
+
+
+		/**
+		* initizlize data change
+		* @returns {undefined}
+		*/
+		var initDataChange = function() {
+			d3.select('#changeData')
+				.on('click', changeDataHandler);
+		};
+		
+		
+		initDataset();
+		initScales();
+		drawGraph();
+		initDataChange();
+
+	</script>
+</body>
+</html>
