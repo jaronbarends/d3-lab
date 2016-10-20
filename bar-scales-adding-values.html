@@ -40,7 +40,7 @@
 		// var dataset = [5, 10, 15, 20, 40, 38, 17, 21, 44, 16, 20, 12, 39, 42, 43, 26, 31, 33, 35],
 		var dataset,
 			dataMax = 60,
-			dataCount = 20,
+			dataCount = 5,
 			w = 600,
 			h = 250,
 			padding = 4;
@@ -159,7 +159,6 @@
 				.attr('fill', function(d) {
 					return getBarColor(d);
 				});
-				console.log('done');
 
 			return selection;
         };
@@ -229,7 +228,7 @@
 		* @returns {undefined}
 		*/
 		var changeDataHandler = function(e) {
-			var deltaCount = 0,
+			var deltaCount = 1,
 				newDataset = getRandomData(deltaCount);
 
 			//update xScale to new number of items
@@ -252,16 +251,17 @@
 			selection = svg.selectAll('rect')
 				.data(newDataset);
 
-			animateSelection(selection)
-				.attr('y', function(d) {
-					return getBarY(d);
-				})
-				.attr('height', function(d) {
-					return yScale(d);
-				})
-				.attr('fill', function(d) {
-					return getBarColor(d);
-				});
+			selection = animateSelection(selection);
+			selection = renderBar(selection);
+				// .attr('y', function(d) {
+				// 	return getBarY(d);
+				// })
+				// .attr('height', function(d) {
+				// 	return yScale(d);
+				// })
+				// .attr('fill', function(d) {
+				// 	return getBarColor(d);
+				// });
 
 			// and update text
 			// selectAndAnimate('text', newDataset)
