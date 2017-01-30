@@ -24,6 +24,10 @@
 			transform: translate(0, 1.2em);
 		}
 
+		#changeData {
+			cursor: pointer;
+		}
+
 	</style>
 </head>
 <body>
@@ -203,6 +207,7 @@
 					return i*50;
 				})
 				.duration(1000);
+				// .ease(d3.easeElasticOut);
 
 			return selection;
 		};
