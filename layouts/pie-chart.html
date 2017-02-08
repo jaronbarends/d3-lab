@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 Pie Chart</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="../css/style.css">
+	<style>
+
+
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+
+
+	</div><!-- /.o-content-width -->
+
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="../js/jquery.min.js"></script>
+	<script src="../js/d3.min.js"></script>
+	
+	<script>
+		var dataset = [5, 10, 20, 45, 6, 25];
+
+		var pie = d3.pie(),
+			color = d3.scaleOrdinal(d3.schemeCategory10);
+
+		var color2 = function(i) {
+			return 'rgb('+i*50+',0,0)';
+		};
+
+		var w = 300,
+			h = 300,
+			outerRadius = w/2,
+			innerRadius = w/4;
+
+		var arc = d3.arc()
+			.innerRadius(innerRadius)
+			.outerRadius(outerRadius);
+
+		var svg = d3.select('body')
+				.append('svg')
+				.attr('width', w)
+				.attr('height', h);
+
+		var arcs = svg.selectAll('g.arc')
+				.data(pie(dataset))
+				.enter()
+				.append('g')
+				.attr('class', 'arc')
+				.attr('transform', 'translate('+outerRadius + ',' + outerRadius +')');
+
+		arcs.append('path')
+			.attr('fill', function(d, i) {
+				return color(i);
+			})
+			.attr('d', arc)
+
+		arcs.append('text')
+			.attr('transform', function(d) {
+				return 'translate(' + arc.centroid(d) + ')';
+			})
+			.attr('text-anchor', 'middle')
+			.text(function(d) {
+				return d.value;
+			});
+
+		
+	</script>
+</body>
+</html>

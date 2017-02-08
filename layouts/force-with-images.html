@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="nl-nl">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<title>d3 Force with images</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="stylesheet" href="../css/style.css">
+	<style>
+		svg {
+			/*background: #f1f1f1;*/
+		}
+
+		#defsHolder {
+			height: 0;
+			width: 0;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="o-content-width">
+		<a href="https://www.youtube.com/watch?v=yxr1IZ3MrAw">https://www.youtube.com/watch?v=yxr1IZ3MrAw</a>
+	
+		<svg id="defsHolder">
+			<defs id="imageDefs"></defs>
+		</svg>
+
+		<div id="chart"></div>
+
+	</div><!-- /.o-content-width -->
+
+
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+	<script src="../js/jquery.min.js"></script>
+	<script src="../js/d3.min.js"></script>
+	
+	<script>
+		var width = 500,
+			height = 500;
+
+		var svg = d3.select('#chart')
+				.append('svg')
+				.attr('width', width)
+				.attr('height', height)
+				.append('g')
+				.attr('transform', 'translate(0,0)');
+
+		var simulation = d3.forceSimulation()
+			.force('forceX', d3.forceX(width / 2).strength(0.05))
+			.force('forceY', d3.forceY(height / 2).strength(0.05))
+			.force('collide', d3.forceCollide(function(d) {
+				return radiusScale(d.size) + 2;
+			}))
+
+		var radiusScale = d3.scaleSqrt().domain([8, 70]).range([10, 60]);
+
+		d3.queue()
+			.defer(d3.csv, 'data/aap-noot-mies.csv')
+			.await(ready);
+
+		function ready(error, datapoints) {
+			var defs = d3.select('#imageDefs'),
+				patterns = defs.selectAll('pattern')
+					.data(datapoints)
+					.enter()
+					.append('pattern')
+					.attr('width', '100%')
+					.attr('height', '100%')
+					.attr('patternContentUnits', 'objectBoundingBox')
+					.attr('id', function(d) {
+						return d.id;
+					})
+					.append('image')
+					.attr('width', '1')
+					.attr('height', '1')
+					.attr('xmlns', 'http://w3.org/1999/xLink')
+					.attr('xLink:href', function(d) {
+						var imgUrl = 'images/aap-noot-mies/'+d.id+'.png';
+						return imgUrl;
+					});
+
+
+
+			var circles = svg.selectAll('.artist')
+				.data(datapoints)
+				.enter()
+				.append('circle')
+				.attr('class', 'artist')
+				.attr('r', function(d) {
+					return radiusScale(d.size);
+				})
+				.attr('fill', function(d) {
+					var fill = 'url(#' + d.id + ')';
+					return fill;
+				})
+				.on('mouseover', function(d) {
+					console.log(d.name, d.size);
+				})
+
+			simulation.nodes(datapoints)
+				.on('tick', ticked);
+
+			function ticked() {
+				circles
+					.attr('cx', function(d) {
+						return d.x;
+					})
+					.attr('cy', function(d) {
+						return d.y;
+					})
+			}
+		}
+
+
+		
+	</script>
+</body>
+</html>

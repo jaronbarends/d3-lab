@@ -1,0 +1,52 @@
+body {
+	font-family: helvetica, arial, sans-serif;
+}
+
+button {
+	display: inline-block;
+	margin: 0.5em;
+	padding: 0.5em;
+}
+svg {
+	/*background: #f1f1f1;*/
+}
+
+#chart {
+	position: relative;
+	width: 1200px;
+	height: 600px;
+}
+
+#defsHolder {
+	height: 0;
+	width: 0;
+}
+
+.employee,
+.employee__bg {
+	position: absolute;
+	z-index: 1;
+	overflow: hidden;
+	border-radius: 50%;
+	width: 80px;
+	height: 80px;
+	background-size: cover;
+	background-color: #666;
+	transform: translate(-50%, -50%);
+}
+
+.employee::after {
+	content: attr(data-name);
+	display: block;
+	opacity: 0;
+}
+
+.employee:hover::after {
+	opacity: 1;
+}
+
+.employee__bg {
+	z-index: 0;
+	border: 20px solid #ddd;
+	/*border: 20px solid #00bdfa;*/
+}
